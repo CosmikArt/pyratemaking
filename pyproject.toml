@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyratemaking"
+version = "0.0.1"
+description = "Pure-Python ratemaking toolkit grounded in Werner & Modlin."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "Isaac López", email = "isaaclopg@gmail.com" },
+]
+keywords = ["actuarial", "ratemaking", "insurance", "glm", "pricing", "p&c"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.11",
+    "statsmodels>=0.14",
+    "matplotlib>=3.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/CosmikArt/pyratemaking"
+Repository = "https://github.com/CosmikArt/pyratemaking"
+Issues = "https://github.com/CosmikArt/pyratemaking/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pyratemaking"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
