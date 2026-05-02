@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] - 2026-05-02
+
+### Fixed
+- `relativities/smoothing.py`: rewired Whittaker bridge to use `whsmooth.WhittakerHenderson1D` (matches whsmooth 0.1.0 API)
+- `relativities/credibility.py`: rewired credibility bridge to use `actuarcredibility.LimitedFluctuationCredibility` (matches published API)
+- `development/_burncost_bridge.py`: rewired triangle handover to use `burncost.LossTriangle` (matches published API)
+
+### Added
+- `tests/integration/test_ecosystem_bridges.py`: end-to-end coverage of optional bridges with real ecosystem libs installed
+- CI matrix dimension `extras: [core, full]` so bridge regressions show up immediately
+
 ## [0.1.0] — 2026-05-02
 
 First release.
