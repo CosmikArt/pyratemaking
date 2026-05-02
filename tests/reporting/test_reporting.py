@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 from pyratemaking.reporting import (
     RatePlanReport,

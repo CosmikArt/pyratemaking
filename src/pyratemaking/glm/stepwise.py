@@ -96,7 +96,7 @@ def stepwise_select(
             for v in candidates:
                 if v in chosen:
                     continue
-                trial = chosen + [v]
+                trial = [*chosen, v]
                 res = fit(trial)
                 candidate_moves.append((_score(res, criterion), "add", v, trial))
         if direction in ("backward", "both"):

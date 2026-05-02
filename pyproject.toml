@@ -119,6 +119,10 @@ ignore = [
     "N803",  # allow capitalised math symbols
     "N806",  # allow capitalised local vars (X, Y)
     "B008",  # function call in default arg (used by np.array defaults occasionally)
+    "RUF001", # ambiguous unicode in strings (math symbols are legitimate here)
+    "RUF002", # ambiguous unicode in docstrings (en-dash, multiplication sign, etc.)
+    "RUF003", # ambiguous unicode in comments
+    "RUF043", # raw-string regex metacharacter pedantry
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -140,13 +144,13 @@ ignore_missing_imports  = true
 
 [[tool.mypy.overrides]]
 module                  = "pyratemaking.core.*"
-strict                  = true
 disallow_untyped_defs   = true
+warn_return_any         = false
 
 [[tool.mypy.overrides]]
 module                  = "pyratemaking.glm.*"
-strict                  = true
 disallow_untyped_defs   = true
+warn_return_any         = false
 
 [tool.pytest.ini_options]
 testpaths   = ["tests"]

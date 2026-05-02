@@ -16,7 +16,6 @@ from sklearn.model_selection import KFold
 from pyratemaking.glm.backend import GLM, GLMResult, _deviance, build_design
 from pyratemaking.glm.families import family_spec
 
-
 _PENALTY_RATIO = {
     "ridge": 0.0,
     "l2": 0.0,

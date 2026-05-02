@@ -12,7 +12,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-
 _AGE_BINS = np.array([18, 25, 30, 40, 50, 60, 70, 95])
 _AGE_FREQ_RELATIVITY = np.array([1.55, 1.20, 1.00, 0.95, 0.92, 0.95, 1.10])
 
@@ -103,7 +102,7 @@ def generate(
     )
 
     claim_rows = []
-    for pid, n_claims, lam in zip(policy_id, claim_count, np.exp(log_lambda)):
+    for pid, n_claims, lam in zip(policy_id, claim_count, np.exp(log_lambda), strict=False):
         for _ in range(int(n_claims)):
             mean_severity = base_severity * (lam / base_frequency) ** 0.4
             shape = severity_dispersion

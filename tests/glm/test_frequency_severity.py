@@ -48,7 +48,7 @@ def test_frequency_severity_model_predicts_pure_premium(synthetic_freq_data):
     )
     pp = fs.predict(df[["region", "driver_age"]], df["exposure"])
     # Mean predicted pure premium ≈ mean observed loss / mean exposure.
-    expected_total = df["claim_amount"].sum()
+    df["claim_amount"].sum()
     pred_total = (pp * df["exposure"]).sum() / df["exposure"].mean()  # approx
     assert pp.shape == (len(df),)
     assert (pp >= 0).all()

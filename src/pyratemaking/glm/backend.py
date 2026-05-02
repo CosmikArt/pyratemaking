@@ -54,9 +54,7 @@ def _looks_categorical(s: pd.Series) -> bool:
         return True
     if s.dtype == object:
         return True
-    if pd.api.types.is_string_dtype(s) and not pd.api.types.is_numeric_dtype(s):
-        return True
-    return False
+    return bool(pd.api.types.is_string_dtype(s) and not pd.api.types.is_numeric_dtype(s))
 
 
 def build_design(
@@ -241,7 +239,7 @@ class GLM:
         else:
             family_arg = spec.name
 
-        alpha = 0.0 if self.alpha in (None, "cv") else float(self.alpha)
+        alpha = 0.0 if self.alpha in (None, "cv") else float(self.alpha)  # type: ignore[arg-type]
         # glum requires fit_intercept=False when an Intercept column is in X.
         glm = GeneralizedLinearRegressor(
             family=family_arg,

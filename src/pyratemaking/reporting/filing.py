@@ -21,7 +21,6 @@ from pyratemaking.reporting.tables import (
     style_actuarial_table,
 )
 
-
 _ENV = jinja2.Environment(
     loader=jinja2.PackageLoader("pyratemaking.reporting", "templates"),
     autoescape=jinja2.select_autoescape(["html"]),

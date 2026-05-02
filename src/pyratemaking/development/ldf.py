@@ -15,6 +15,7 @@ Friedland, J. (2013). *Fundamentals of General Insurance Actuarial Analysis*,
 
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass
 
 import numpy as np
@@ -43,7 +44,7 @@ def age_to_age_factors(
     """
     cols = list(triangle.columns)
     out = {}
-    for j, j_next in zip(cols[:-1], cols[1:], strict=False):
+    for j, j_next in itertools.pairwise(cols):
         prev = triangle[j]
         nxt = triangle[j_next]
         mask = prev.notna() & nxt.notna()

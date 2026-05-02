@@ -15,10 +15,10 @@ callers can both see projected values and apply a trend factor to historical
 points.
 """
 
-from pyratemaking.trending.severity import severity_trend
+from pyratemaking.trending.core import Trend, fit_trend
 from pyratemaking.trending.frequency import frequency_trend
 from pyratemaking.trending.pure_premium import pure_premium_trend
-from pyratemaking.trending.core import Trend, fit_trend
+from pyratemaking.trending.severity import severity_trend
 
 __all__ = [
     "Trend",

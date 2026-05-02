@@ -47,7 +47,7 @@ def test_power_curve_recovers_exponent():
 
 def test_exponential_decay_returns_finite_tail():
     f = _decaying_link_factors()
-    tail, info = exponential_decay_tail(f, periods_to_extend=20)
+    tail, _info = exponential_decay_tail(f, periods_to_extend=20)
     assert np.isfinite(tail)
     assert tail >= 1.0
 

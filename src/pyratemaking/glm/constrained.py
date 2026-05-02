@@ -118,7 +118,7 @@ def fit_monotone_glm(
         # we don't double-count after the next refit drops it.
         # Simpler approach: drop the variable from X for subsequent fits and
         # carry only the projected offset.
-        X = X[other_cols + [constrained_var]]  # keep var for predict() context
+        X = X[[*other_cols, constrained_var]]  # keep var for predict() context
         constraint_offset = constraint_offset_new
 
         if abs(last_deviance - result.deviance) < tol:

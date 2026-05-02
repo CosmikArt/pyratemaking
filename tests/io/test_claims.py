@@ -3,7 +3,6 @@ import pandas as pd
 import pytest
 
 from pyratemaking.io.claims import (
-    ClaimsSchema,
     aggregate_to_ay,
     loss_triangle,
     merge_policy_losses,

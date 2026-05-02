@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import pytest
 
 from pyratemaking.glm import (
     fit_monotone_glm,

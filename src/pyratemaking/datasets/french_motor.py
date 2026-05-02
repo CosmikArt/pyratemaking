@@ -27,7 +27,6 @@ import pandas as pd
 
 from pyratemaking.datasets._cache import cache_dir
 
-
 _FREQ_URLS = (
     "https://raw.githubusercontent.com/dutangc/CASdatasets/master/data/freMTPL2freq.csv",
     "https://www.openml.org/data/get_csv/22044756/dataset",
@@ -43,7 +42,7 @@ def _download(urls: tuple[str, ...], target: Path) -> None:
     last_error: Exception | None = None
     for url in urls:
         try:
-            urllib.request.urlretrieve(url, target)  # noqa: S310 - public dataset
+            urllib.request.urlretrieve(url, target)
             return
         except Exception as e:  # pragma: no cover - network behaviour
             last_error = e

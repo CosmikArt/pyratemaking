@@ -63,8 +63,7 @@ class ClassificationResult:
 
     def _predict_pure_premium(self, x: pd.DataFrame) -> np.ndarray:
         if self.family == "tweedie":
-            tw = self.raw_model
-            assert tw is not None
+            tw: TweedieModel = self.raw_model  # type: ignore[assignment]
             return np.asarray(tw.predict(x), dtype=float)
         if self.family == "frequency_severity":
             fs: FrequencySeverityModel = self.raw_model  # type: ignore[assignment]
@@ -179,9 +178,9 @@ def classify(
 
 def _predict_pp(model: object, family: str, X: pd.DataFrame) -> np.ndarray:
     if family == "tweedie":
-        return np.asarray(model.predict(X), dtype=float)  # type: ignore[union-attr]
+        tw: TweedieModel = model  # type: ignore[assignment]
+        return np.asarray(tw.predict(X), dtype=float)
     if family == "frequency_severity":
-        return np.asarray(
-            model.predict(X, exposure=np.ones(len(X))), dtype=float  # type: ignore[union-attr]
-        )
+        fs: FrequencySeverityModel = model  # type: ignore[assignment]
+        return np.asarray(fs.predict(X, exposure=np.ones(len(X))), dtype=float)
     raise ValueError(family)

@@ -64,7 +64,7 @@ def accumulated_local_effects(
 ) -> pd.DataFrame:
     """Apley-Zhu (2020) ALE for a numeric feature.
 
-    More robust than PDP when the feature is correlated with others.
+    Less biased than PDP when the feature is correlated with others.
     """
     if not pd.api.types.is_numeric_dtype(X[feature]):
         raise TypeError("ALE requires a numeric feature")

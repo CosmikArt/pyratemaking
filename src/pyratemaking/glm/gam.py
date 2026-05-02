@@ -21,7 +21,7 @@ def fit_gam(
     smooth_columns: Sequence[str],
     family: str = "gamma",
     weights: np.ndarray | pd.Series | None = None,
-):
+) -> object:
     """Fit a GAM with smooth terms on the requested columns.
 
     Returns the underlying ``pygam`` model so callers can use ``predict``,

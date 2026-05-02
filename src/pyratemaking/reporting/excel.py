@@ -13,7 +13,6 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
 
-
 _HEADER_FILL = PatternFill(start_color="EEEEEE", end_color="EEEEEE", fill_type="solid")
 _HEADER_FONT = Font(bold=True)
 
@@ -54,7 +53,7 @@ def write_excel(
             cell.alignment = Alignment(horizontal="left")
 
         formats = column_formats.get(sheet_name, {})
-        for col_idx, header_cell in enumerate(ws[1], start=1):
+        for _col_idx, header_cell in enumerate(ws[1], start=1):
             col_letter = header_cell.column_letter
             fmt = formats.get(str(header_cell.value))
             if fmt is None:

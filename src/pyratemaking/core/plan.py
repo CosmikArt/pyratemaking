@@ -35,14 +35,18 @@ from pyratemaking.diagnostics import (
 )
 from pyratemaking.io.claims import (
     ClaimsSchema,
-    aggregate_to_ay as agg_claims,
     merge_policy_losses,
     validate_claims,
 )
+from pyratemaking.io.claims import (
+    aggregate_to_ay as agg_claims,
+)
 from pyratemaking.io.policies import (
     PolicySchema,
-    aggregate_to_ay as agg_policies,
     validate_policies,
+)
+from pyratemaking.io.policies import (
+    aggregate_to_ay as agg_policies,
 )
 from pyratemaking.reporting import RatePlanReport, write_excel
 

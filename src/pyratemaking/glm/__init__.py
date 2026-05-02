@@ -12,8 +12,8 @@ deviance / log-likelihood.
 
 from pyratemaking.glm.backend import GLM, GLMResult
 from pyratemaking.glm.constrained import (
-    monotone_relativities,
     fit_monotone_glm,
+    monotone_relativities,
 )
 from pyratemaking.glm.families import family_spec
 from pyratemaking.glm.frequency_severity import (
@@ -26,8 +26,8 @@ from pyratemaking.glm.stepwise import stepwise_select
 from pyratemaking.glm.tweedie import TweedieModel
 
 __all__ = [
-    "FrequencySeverityModel",
     "GLM",
+    "FrequencySeverityModel",
     "GLMResult",
     "TweedieModel",
     "family_spec",

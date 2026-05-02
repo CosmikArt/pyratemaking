@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import pytest
 
 from pyratemaking.trending import Trend, fit_trend
