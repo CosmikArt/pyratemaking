@@ -1,122 +1,91 @@
-<p align="center">
-  <strong>pyratemaking</strong><br>
-  <em>Pure-Python ratemaking toolkit grounded in Werner &amp; Modlin.</em>
-</p>
+# pyratemaking 📊
 
-<p align="center">
-  <a href="#"><img src="https://img.shields.io/pypi/v/pyratemaking?color=blue&label=PyPI" alt="PyPI"></a>
-  <a href="#"><img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/status-alpha-orange" alt="Status: Alpha"></a>
-</p>
+**Pure-Python ratemaking for P&C insurance — end to end.**
 
----
+[![PyPI](https://img.shields.io/pypi/v/pyratemaking.svg)](https://pypi.org/project/pyratemaking/)
+[![Python](https://img.shields.io/pypi/pyversions/pyratemaking.svg)](https://pypi.org/project/pyratemaking/)
+[![Tests](https://github.com/CosmikArt/pyratemaking/actions/workflows/test.yml/badge.svg)](https://github.com/CosmikArt/pyratemaking/actions/workflows/test.yml)
+[![Coverage](https://codecov.io/gh/CosmikArt/pyratemaking/branch/main/graph/badge.svg)](https://codecov.io/gh/CosmikArt/pyratemaking)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## What is pyratemaking?
+`pyratemaking` is the Python implementation of the Werner & Modlin ratemaking workflow: rate level indication, on-leveling, trending, development, classification analysis, large loss procedures, and rate implementation. Built for P&C actuaries who want a reproducible pipeline from raw policies and claims to a defensible rate filing.
 
-**pyratemaking** is an opinionated Python library for property & casualty ratemaking, built around the methodology in *Basic Ratemaking* (Werner & Modlin, CAS, 5th ed.). It provides a single, composable API that takes you from raw loss triangles and exposure records to indicated rate changes — the workflow every pricing actuary runs quarterly but still cobbles together in Excel.
+## Why
 
-The actuarial Python ecosystem has solid reserving tools (`chainladder-python`) and general stats (`statsmodels`), but nothing that owns the **ratemaking** vertical end-to-end: exposure trending, on-leveling, GLM frequency–severity modeling, classification relativities, and diagnostics — all in one namespace. pyratemaking fills that gap.
+Python has GLM libraries. It has chain-ladder libraries. It does not have an end-to-end ratemaking workflow. `pyratemaking` is that workflow.
 
-## Installation
+## Install
 
 ```bash
-pip install pyratemaking
+pip install pyratemaking            # core
+pip install pyratemaking[full]      # with full ecosystem (whsmooth, actudist, etc.)
 ```
-
-> **Note:** The package is not yet published on PyPI. For now, install from source:
-> ```bash
-> git clone https://github.com/CosmikArt/pyratemaking.git
-> cd pyratemaking
-> pip install -e ".[dev]"
-> ```
 
 ## Quickstart
 
 ```python
-import pyratemaking as prm
-import pandas as pd
+from pyratemaking import RatePlan
+from pyratemaking.datasets import french_motor
 
-# --- 1. Load policy-level experience ---
-experience = pd.DataFrame({
-    "accident_year": [2020, 2020, 2021, 2021, 2022, 2022],
-    "territory":     ["A", "B", "A", "B", "A", "B"],
-    "earned_exposure": [1200, 800, 1350, 900, 1400, 950],
-    "claim_count":   [60, 55, 58, 50, 65, 48],
-    "incurred_loss": [480_000, 520_000, 470_000, 490_000, 530_000, 460_000],
-})
+policies, claims = french_motor.load()
 
-# --- 2. Fit a frequency–severity GLM ---
-model = prm.FrequencySeverityModel(
-    freq_dist="poisson",
-    sev_dist="gamma",
-    link="log",
-)
-model.fit(
-    experience,
-    exposure_col="earned_exposure",
-    freq_target="claim_count",
-    sev_target="incurred_loss",
-    features=["territory", "accident_year"],
+plan = RatePlan(
+    policies=policies,
+    claims=claims,
+    exposure_col="exposure",
+    loss_col="claim_amount",
+    ay_col="policy_ay",
 )
 
-# --- 3. Classification relativities ---
-relativities = model.relativities(base_level={"territory": "A"})
-print(relativities)
-#   feature   level  relativity  std_error
-# 0 territory   A      1.000      —
-# 1 territory   B      0.923      0.041
+indication = plan.indicate(method="loss_ratio", target_lr=0.65)
+print(indication.summary())
 
-# --- 4. Diagnostics ---
-model.lift_chart(n_bins=10)            # observed vs predicted by decile
-model.actual_vs_expected(by="territory")  # A/E ratio per class
+plan.classify(
+    rating_vars=["driver_age", "veh_power", "region"],
+    backend="glum",
+    family="tweedie",
+    power=1.5,
+)
+
+plan.implement(cap=1.15, floor=0.85)
+plan.report.filing("filing_2026.html")
 ```
 
-## Features
+## Werner & Modlin coverage
 
-| Module | Description | Status |
-|--------|-------------|--------|
-| `glm` | Frequency–severity GLMs (Poisson, Negative Binomial, Tweedie, Gamma) via `statsmodels` backend | 🚧 In progress |
-| `exposure` | Earned/written exposure calculations, calendar-year and policy-year handling | 📋 Roadmap |
-| `trending` | Loss and premium trending (exponential, linear) aligned to future effective period | 📋 Roadmap |
-| `onlevel` | On-leveling of historical premiums using parallelogram method | 📋 Roadmap |
-| `classification` | Classification ratemaking: minimum bias, Bailey–Simon, GLM-based relativities | 🚧 In progress |
-| `baserate` | Indicated base rate and overall rate level change calculation | 📋 Roadmap |
-| `diagnostics` | Lift charts, double lift charts, A/E ratios, residual plots, Gini coefficient | 🚧 In progress |
-| `io` | Read/write ratemaking exhibits in CAS-standard format | 📋 Roadmap |
+| Chapter | Topic                          | Module                            |
+| ------- | ------------------------------ | --------------------------------- |
+| 5       | On-leveling                    | `pyratemaking.onleveling`         |
+| 6       | Loss development               | `pyratemaking.development`        |
+| 7       | Trending                       | `pyratemaking.trending`           |
+| 8       | Overall rate level indication  | `pyratemaking.core.indication`    |
+| 9-10    | Classification ratemaking      | `pyratemaking.core.classification`|
+| 11      | Increased limits / large loss  | `pyratemaking.large_loss`         |
+| 12      | GLMs                           | `pyratemaking.glm`                |
+| 14      | Implementation                 | `pyratemaking.core.implementation`|
 
-## API Design Principles
+## Ecosystem
 
-1. **DataFrames in, DataFrames out.** No custom container objects — everything flows through `pandas`.
-2. **Werner & Modlin as spec.** Chapter references in docstrings so you can trace every formula.
-3. **Composition over monoliths.** Each module works standalone; the `RatemakingPipeline` chains them.
-4. **Diagnostics are first-class.** Every model ships with `.lift_chart()`, `.residuals()`, and `.actual_vs_expected()`.
+Part of a 6-library actuarial Python suite:
+
+- [`actudist`](https://pypi.org/project/actudist/) — severity and frequency distributions
+- [`burncost`](https://pypi.org/project/burncost/) — burning cost analysis
+- [`actuarcredibility`](https://pypi.org/project/actuarcredibility/) — credibility methods
+- [`whsmooth`](https://pypi.org/project/whsmooth/) — Whittaker-Henderson smoothing
+- **`pyratemaking`** — ratemaking workflow (this library)
+- `pyinsurancerating` — rating engine (coming)
+
+## Roadmap
+
+Future releases will add Bayesian hierarchical credibility, deep-learning rating models (LocalGLMnet, CANN), premium calculation principles, fairness auditing, a CLI tool, and a Streamlit exploration dashboard. See [milestones](https://github.com/CosmikArt/pyratemaking/milestones).
 
 ## References
 
-- Werner, G. & Modlin, C. (2016). *Basic Ratemaking*, 5th ed. Casualty Actuarial Society.
-- De Jong, P. & Heller, G.Z. (2008). *Generalized Linear Models for Insurance Data*. Cambridge University Press.
-- Goldburd, M., Khare, A. & Tevet, D. (2016). *Generalized Linear Models for Insurance Rating*, 2nd ed. CAS Monograph No. 5.
-- Ohlsson, E. & Johansson, B. (2010). *Non-Life Insurance Pricing with Generalized Linear Models*. Springer.
-- Anderson, D. et al. (2007). *A Practitioner's Guide to Generalized Linear Models*, 3rd ed. CAS Study Note.
-
-## Contributing
-
-Contributions welcome. This project follows a **docs-first** approach — if you want to add a module, start with the docstrings and a design note in `docs/`, then implement.
-
-```bash
-git clone https://github.com/CosmikArt/pyratemaking.git
-cd pyratemaking
-pip install -e ".[dev]"
-pytest
-```
-
-Please open an issue before submitting large PRs.
+- Werner, G. & Modlin, C. (2016). *Basic Ratemaking* (5th ed.). Casualty Actuarial Society.
+- Goldburd, M., Khare, A., Tevet, D. & Guller, D. (2020). *Generalized Linear Models for Insurance Rating* (2nd ed.). CAS Monograph 5.
+- Friedland, J. (2013). *Fundamentals of General Insurance Actuarial Analysis*. Society of Actuaries.
+- Mack, T. (1993). "Distribution-free Calculation of the Standard Error of Chain Ladder Reserve Estimates." *ASTIN Bulletin*, 23(2), 213-225.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
-
-## Author
-
-**Isaac López**
+MIT © Isaac López
