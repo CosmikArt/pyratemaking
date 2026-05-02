@@ -1,8 +1,11 @@
 """Multi-way classification analysis (W&M §§9–10).
 
-Wraps a Tweedie or frequency-severity GLM, extracts relativities, applies the
-balance principle (W&M §10.4), computes the off-balance correction, and
-calibrates a base rate consistent with the indicated total premium.
+Wraps a Tweedie or frequency-severity GLM, extracts relativities for the
+categorical rating variables, calibrates a scale factor so the rated
+premium matches a target, and exposes a simple ``predict_premium`` API.
+Numeric rating variables (e.g. driver age, sum insured) participate in the
+GLM directly — they don't show up in the relativity tables but their
+effect is fully captured in :meth:`ClassificationResult.predict_premium`.
 """
 
 from __future__ import annotations
@@ -18,10 +21,7 @@ from pyratemaking.glm import (
     GLMResult,
     TweedieModel,
 )
-from pyratemaking.relativities.multi_way import (
-    balance_principle_check,
-    multi_way_relativities,
-)
+from pyratemaking.relativities.multi_way import multi_way_relativities
 
 
 @dataclass
@@ -33,6 +33,7 @@ class ClassificationResult:
     family: str
     relativities: dict[str, pd.Series]
     base_rate: float
+    scale_factor: float
     off_balance: float
     raw_model: object = field(default=None, repr=False)
 
@@ -49,30 +50,38 @@ class ClassificationResult:
                 )
         return pd.DataFrame(rows)
 
-    def predict_premium(self, policies: pd.DataFrame, exposure_col: str = "exposure") -> np.ndarray:
-        factors = np.ones(len(policies))
-        for var, rel in self.relativities.items():
-            factors *= policies[var].map(rel.astype(float).to_dict()).to_numpy(dtype=float)
-        return self.base_rate * factors * policies[exposure_col].to_numpy(dtype=float)
+    def predict_premium(
+        self,
+        policies: pd.DataFrame,
+        exposure_col: str = "exposure",
+    ) -> np.ndarray:
+        """Predicted total premium per policy (loss + load implicit in scaling)."""
+        x = policies[self.rating_vars]
+        pp_per_unit = self._predict_pure_premium(x)
+        exposure = policies[exposure_col].to_numpy(dtype=float)
+        return self.scale_factor * pp_per_unit * exposure
+
+    def _predict_pure_premium(self, x: pd.DataFrame) -> np.ndarray:
+        if self.family == "tweedie":
+            tw = self.raw_model
+            assert tw is not None
+            return np.asarray(tw.predict(x), dtype=float)
+        if self.family == "frequency_severity":
+            fs: FrequencySeverityModel = self.raw_model  # type: ignore[assignment]
+            return np.asarray(fs.predict(x, exposure=np.ones(len(x))), dtype=float)
+        raise ValueError(f"unsupported family for prediction: {self.family!r}")
 
     def summary(self) -> pd.DataFrame:
         return pd.DataFrame(
-            {
-                "item": [
-                    "rating_vars",
-                    "backend",
-                    "family",
-                    "base_rate",
-                    "off_balance",
-                ],
-                "value": [
-                    ", ".join(self.rating_vars),
-                    self.backend,
-                    self.family,
-                    f"{self.base_rate:.4f}",
-                    f"{self.off_balance:.4f}",
-                ],
-            }
+            [
+                ("rating_vars", ", ".join(self.rating_vars)),
+                ("backend", self.backend),
+                ("family", self.family),
+                ("base_rate", f"{self.base_rate:.4f}"),
+                ("scale_factor", f"{self.scale_factor:.6f}"),
+                ("off_balance", f"{self.off_balance:.6f}"),
+            ],
+            columns=["item", "value"],
         ).set_index("item")
 
     def __repr__(self) -> str:
@@ -97,29 +106,7 @@ def classify(
 ) -> ClassificationResult:
     """Run a multi-way classification analysis end to end.
 
-    Parameters
-    ----------
-    policies : DataFrame
-        One row per earned-exposure period with rating variables, exposure,
-        and incurred losses.
-    rating_vars : sequence of str
-        Variables to fit. Categorical and numeric both supported.
-    family : str
-        ``"tweedie"`` for a single GLM on pure premium (default), or
-        ``"frequency_severity"`` for a Poisson + Gamma pair (requires
-        ``count_col``).
-    backend : str
-        ``"glum"`` (default) or ``"statsmodels"``.
-    tweedie_power : float
-        Power for Tweedie family. Ignored for frequency-severity.
-    target_average_premium : float, optional
-        If provided, the base rate is calibrated so that the average rated
-        premium equals this target. Otherwise it is calibrated to the average
-        observed loss + an implicit zero load.
-
-    Returns
-    -------
-    :class:`ClassificationResult`.
+    See module docstring for the contract.
     """
     rating_vars = list(rating_vars)
     base_levels = dict(base_levels or {})
@@ -138,13 +125,12 @@ def classify(
             base_levels=base_levels,
         )
         glm: GLMResult = tw.fit_result
-        rels = multi_way_relativities(glm, rating_vars)
+        cat_vars = [v for v in rating_vars if not pd.api.types.is_numeric_dtype(X[v])]
+        rels = multi_way_relativities(glm, cat_vars)
         raw_model: object = tw
     elif family == "frequency_severity":
         if count_col is None or count_col not in policies.columns:
-            raise KeyError(
-                "frequency_severity classification requires count_col"
-            )
+            raise KeyError("frequency_severity classification requires count_col")
         fs = FrequencySeverityModel.fit(
             X,
             policies[count_col],
@@ -153,10 +139,10 @@ def classify(
             backend=backend,
             base_levels=base_levels,
         )
+        cat_vars = [v for v in rating_vars if not pd.api.types.is_numeric_dtype(X[v])]
         rels = {
             v: fs.frequency.relativities(v) * fs.severity.relativities(v)
-            for v in rating_vars
-            if not np.issubdtype(X[v].dtype, np.number)
+            for v in cat_vars
         }
         raw_model = fs
     else:
@@ -164,53 +150,38 @@ def classify(
             f"family must be 'tweedie' or 'frequency_severity', got {family!r}"
         )
 
-    base_rate = _calibrate_base_rate(
-        policies,
-        rels,
-        rating_vars,
-        exposure_col=exposure_col,
-        loss_col=loss_col,
-        target_average_premium=target_average_premium,
-    )
-    bp = balance_principle_check(
-        policies,
-        rels,
-        base_rate,
-        exposure_col=exposure_col,
-        loss_col=loss_col,
-    )
+    pp_pred = _predict_pp(raw_model, family, X)
+    base_rate = float(np.mean(pp_pred))
+
+    raw_total_premium = float((pp_pred * exposure).sum())
+    if raw_total_premium <= 0:
+        raise ValueError("predicted pure premium is zero; cannot calibrate")
+    if target_average_premium is None:
+        target_total = float(losses.sum())
+    else:
+        target_total = float(target_average_premium * exposure.sum())
+
+    scale_factor = target_total / raw_total_premium
+    rated_total = scale_factor * raw_total_premium
+    off_balance = float(losses.sum() / rated_total) if rated_total > 0 else float("nan")
+
     return ClassificationResult(
         rating_vars=rating_vars,
         backend=backend,
         family=family,
         relativities=rels,
-        base_rate=base_rate,
-        off_balance=float(bp["off_balance"]),
+        base_rate=base_rate * scale_factor,
+        scale_factor=scale_factor,
+        off_balance=off_balance,
         raw_model=raw_model,
     )
 
 
-def _calibrate_base_rate(
-    policies: pd.DataFrame,
-    relativities: dict[str, pd.Series],
-    rating_vars: Sequence[str],
-    *,
-    exposure_col: str,
-    loss_col: str,
-    target_average_premium: float | None,
-) -> float:
-    factors = np.ones(len(policies))
-    for v in rating_vars:
-        if v not in relativities:
-            continue
-        rel_map = relativities[v].astype(float).to_dict()
-        factors *= policies[v].map(rel_map).to_numpy(dtype=float)
-    exposure = policies[exposure_col].to_numpy(dtype=float)
-    weighted_factors = (factors * exposure).sum()
-    if weighted_factors <= 0:
-        raise ValueError("relativities collapse to zero; cannot calibrate base rate")
-    if target_average_premium is None:
-        total = float(policies[loss_col].sum())
-        return total / weighted_factors
-    avg_factor = weighted_factors / exposure.sum()
-    return float(target_average_premium / avg_factor)
+def _predict_pp(model: object, family: str, X: pd.DataFrame) -> np.ndarray:
+    if family == "tweedie":
+        return np.asarray(model.predict(X), dtype=float)  # type: ignore[union-attr]
+    if family == "frequency_severity":
+        return np.asarray(
+            model.predict(X, exposure=np.ones(len(X))), dtype=float  # type: ignore[union-attr]
+        )
+    raise ValueError(family)
