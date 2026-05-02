@@ -86,8 +86,6 @@ def test_layer_pricing_from_distribution_invalid_object_raises():
 
 def test_layer_pricing_table_runs():
     losses = np.array([100.0, 500.0, 1500.0, 3000.0, 10_000.0])
-    table = layer_pricing_table(
-        losses, layers=[(0, 1000.0), (1000.0, 4000.0), (5000.0, None)]
-    )
+    table = layer_pricing_table(losses, layers=[(0, 1000.0), (1000.0, 4000.0), (5000.0, None)])
     assert len(table) == 3
     assert (table["avg_layer_loss"] >= 0).all()

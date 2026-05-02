@@ -31,9 +31,7 @@ _FREQ_URLS = (
     "https://raw.githubusercontent.com/dutangc/CASdatasets/master/data/freMTPL2freq.csv",
     "https://www.openml.org/data/get_csv/22044756/dataset",
 )
-_SEV_URLS = (
-    "https://raw.githubusercontent.com/dutangc/CASdatasets/master/data/freMTPL2sev.csv",
-)
+_SEV_URLS = ("https://raw.githubusercontent.com/dutangc/CASdatasets/master/data/freMTPL2sev.csv",)
 
 
 def _download(urls: tuple[str, ...], target: Path) -> None:

@@ -17,7 +17,9 @@ _AGE_FREQ_RELATIVITY = np.array([1.55, 1.20, 1.00, 0.95, 0.92, 0.95, 1.10])
 
 
 def _age_relativity(age: np.ndarray) -> np.ndarray:
-    idx = np.clip(np.searchsorted(_AGE_BINS, age, side="right") - 1, 0, len(_AGE_FREQ_RELATIVITY) - 1)
+    idx = np.clip(
+        np.searchsorted(_AGE_BINS, age, side="right") - 1, 0, len(_AGE_FREQ_RELATIVITY) - 1
+    )
     return _AGE_FREQ_RELATIVITY[idx]
 
 
@@ -48,10 +50,18 @@ def generate(
     """
     rng = np.random.default_rng(seed)
     region_effect = region_effect or {
-        "R24": 0.0, "R52": 0.10, "R93": -0.10, "R11": 0.05, "R72": -0.05
+        "R24": 0.0,
+        "R52": 0.10,
+        "R93": -0.10,
+        "R11": 0.05,
+        "R72": -0.05,
     }
     veh_brand_effect = veh_brand_effect or {
-        "B1": 0.0, "B2": 0.05, "B12": 0.10, "B3": -0.05, "B5": 0.0
+        "B1": 0.0,
+        "B2": 0.05,
+        "B12": 0.10,
+        "B3": -0.05,
+        "B5": 0.0,
     }
     region = rng.choice(list(region_effect.keys()), size=n_policies)
     veh_brand = rng.choice(list(veh_brand_effect.keys()), size=n_policies)

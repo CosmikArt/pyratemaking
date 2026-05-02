@@ -41,9 +41,7 @@ def test_french_motor_pipeline_runs(french_book, tmp_path: Path):
     policies, claims = french_book
     sample = policies.sample(20_000, random_state=0)
     sample = sample.reset_index(drop=True)
-    sample_claims = claims[claims["policy_id"].isin(sample["policy_id"])].reset_index(
-        drop=True
-    )
+    sample_claims = claims[claims["policy_id"].isin(sample["policy_id"])].reset_index(drop=True)
     plan = RatePlan(sample, sample_claims, premium_col=None)
     # No earned premium column — use pure-premium indication.
     plan.indicate(

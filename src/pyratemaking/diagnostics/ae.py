@@ -33,16 +33,23 @@ def actual_vs_expected(
         actual = (df[actual_col] * weight).sum() if weight_col else df[actual_col].sum()
         expected = (df[expected_col] * weight).sum() if weight_col else df[expected_col].sum()
         return pd.DataFrame(
-            {"actual": [float(actual)], "expected": [float(expected)], "a_to_e": [actual / expected]}
+            {
+                "actual": [float(actual)],
+                "expected": [float(expected)],
+                "a_to_e": [actual / expected],
+            }
         )
 
     if isinstance(by, str):
         by = [by]
     if weight_col:
         weight = df[weight_col]
-        grouped = df.assign(_a=df[actual_col] * weight, _e=df[expected_col] * weight).groupby(
-            list(by), dropna=False
-        )[["_a", "_e"]].sum().rename(columns={"_a": "actual", "_e": "expected"})
+        grouped = (
+            df.assign(_a=df[actual_col] * weight, _e=df[expected_col] * weight)
+            .groupby(list(by), dropna=False)[["_a", "_e"]]
+            .sum()
+            .rename(columns={"_a": "actual", "_e": "expected"})
+        )
     else:
         grouped = df.groupby(list(by), dropna=False).agg(
             actual=(actual_col, "sum"),

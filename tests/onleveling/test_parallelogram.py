@@ -18,26 +18,20 @@ def test_no_rate_changes_yields_unity():
 
 def test_change_at_year_start_affects_lower_right_triangle_only():
     # A change at u=Y catches only the right half of the hat (area 0.5).
-    avg = average_rate_level(
-        2020, rate_changes=[RateChange(date=2020.0, factor=1.10)]
-    )
+    avg = average_rate_level(2020, rate_changes=[RateChange(date=2020.0, factor=1.10)])
     assert avg == pytest.approx(0.5 * 1.0 + 0.5 * 1.10, rel=1e-12)
 
 
 def test_change_at_prior_year_start_affects_full_year():
     # A change at u=Y-1 catches the entire hat.
-    avg = average_rate_level(
-        2020, rate_changes=[RateChange(date=2019.0, factor=1.10)]
-    )
+    avg = average_rate_level(2020, rate_changes=[RateChange(date=2019.0, factor=1.10)])
     assert avg == pytest.approx(1.10, rel=1e-12)
 
 
 def test_single_mid_year_change_splits_proportionally():
     # Change at 2020.5 catches only the upper-right triangle of the hat:
     # base 0.5 wide × height 0.5 / 2 = 0.125 area.
-    avg = average_rate_level(
-        2020, rate_changes=[RateChange(date=2020.5, factor=1.10)]
-    )
+    avg = average_rate_level(2020, rate_changes=[RateChange(date=2020.5, factor=1.10)])
     assert avg == pytest.approx(0.875 * 1.0 + 0.125 * 1.10, rel=1e-12)
 
 

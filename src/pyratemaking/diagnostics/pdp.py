@@ -69,9 +69,7 @@ def accumulated_local_effects(
     if not pd.api.types.is_numeric_dtype(X[feature]):
         raise TypeError("ALE requires a numeric feature")
 
-    edges = np.quantile(
-        X[feature].to_numpy(dtype=float), np.linspace(0, 1, n_bins + 1)
-    )
+    edges = np.quantile(X[feature].to_numpy(dtype=float), np.linspace(0, 1, n_bins + 1))
     edges = np.unique(edges)  # safety against ties
     centers = (edges[:-1] + edges[1:]) / 2
 

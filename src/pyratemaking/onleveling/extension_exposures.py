@@ -76,8 +76,8 @@ def extension_of_exposures(
         earned_premium=(collected_premium_col, "sum"),
         on_level_premium=("on_level_premium", "sum"),
     )
-    grouped["on_level_factor"] = (
-        grouped["on_level_premium"] / grouped["earned_premium"]
-    ).where(grouped["earned_premium"] > 0)
+    grouped["on_level_factor"] = (grouped["on_level_premium"] / grouped["earned_premium"]).where(
+        grouped["earned_premium"] > 0
+    )
     grouped.index.name = "ay"
     return grouped

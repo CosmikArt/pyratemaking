@@ -21,9 +21,18 @@ def _toy_policies():
             "region": ["A"] * 4 + ["B"] * 4 + ["C"] * 4,
             "exposure": [1.0] * 12,
             "incurred_losses": [
-                100.0, 110.0, 90.0, 100.0,    # A
-                150.0, 160.0, 140.0, 150.0,   # B
-                70.0, 80.0, 60.0, 90.0,       # C
+                100.0,
+                110.0,
+                90.0,
+                100.0,  # A
+                150.0,
+                160.0,
+                140.0,
+                150.0,  # B
+                70.0,
+                80.0,
+                60.0,
+                90.0,  # C
             ],
             "claim_count": [1] * 12,
         }
@@ -51,9 +60,7 @@ def test_multi_way_relativities_pulled_from_glm():
     exposure = rng.uniform(0.5, 1.0, size=n)
     log_lambda = np.where(region == "A", np.log(0.10), np.log(0.10) + 0.20)
     counts = rng.poisson(np.exp(log_lambda) * exposure)
-    df = pd.DataFrame(
-        {"region": region, "exposure": exposure, "claim_count": counts}
-    )
+    df = pd.DataFrame({"region": region, "exposure": exposure, "claim_count": counts})
     fit = fit_frequency(df[["region"]], df["claim_count"], df["exposure"])
     rel = multi_way_relativities(fit, ["region"])
     assert rel["region"].loc["A"] == pytest.approx(1.0)
@@ -87,9 +94,7 @@ def test_balance_principle_check_returns_off_balance_ratio():
 def test_credibility_weighted_blends_with_complement():
     rel = pd.Series({"A": 1.20, "B": 0.80})
     exposure = pd.Series({"A": 100.0, "B": 100.0})
-    out = credibility_weighted(
-        rel, exposure, complement=1.0, full_credibility_exposure=400.0
-    )
+    out = credibility_weighted(rel, exposure, complement=1.0, full_credibility_exposure=400.0)
     z = np.sqrt(100 / 400)
     assert out.loc["A"] == pytest.approx(z * 1.20 + (1 - z) * 1.0)
     assert out.loc["B"] == pytest.approx(z * 0.80 + (1 - z) * 1.0)

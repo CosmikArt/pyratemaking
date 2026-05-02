@@ -85,11 +85,7 @@ def double_lift(
     a = a[order]
     pa = pa[order]
     pb = pb[order]
-    w = (
-        np.ones_like(a)
-        if weights is None
-        else np.asarray(weights, dtype=float)[order]
-    )
+    w = np.ones_like(a) if weights is None else np.asarray(weights, dtype=float)[order]
     cum_w = np.cumsum(w)
     edges = np.linspace(0, cum_w[-1], n_bins + 1)
     rows = []
@@ -119,9 +115,7 @@ def decile_analysis(
 ) -> pd.DataFrame:
     """Actual-to-expected by predicted decile."""
     table = lift_table(actual, predicted, weights=weights, n_bins=10)
-    table["a_to_e"] = table["avg_actual"] / table["avg_predicted"].where(
-        table["avg_predicted"] > 0
-    )
+    table["a_to_e"] = table["avg_actual"] / table["avg_predicted"].where(table["avg_predicted"] > 0)
     return table
 
 

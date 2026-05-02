@@ -140,9 +140,7 @@ class GLMResult:
         coefs = self.coef_.reindex(self.design.feature_names).to_numpy(dtype=float)
         eta = design @ coefs
         if self.fitted_offset and exposure is None:
-            raise ValueError(
-                "this fit used an exposure offset; pass exposure= to predict"
-            )
+            raise ValueError("this fit used an exposure offset; pass exposure= to predict")
         if exposure is not None:
             eta = eta + np.log(np.asarray(exposure, dtype=float))
         return _inverse_link(eta, self.link)
@@ -155,7 +153,7 @@ class GLMResult:
         items: dict[str, float] = {self.design.base_levels[variable]: 1.0}
         for name, coef in self.coef_.items():
             if isinstance(name, str) and name.startswith(prefix):
-                level = name[len(prefix):-1]
+                level = name[len(prefix) : -1]
                 items[level] = float(np.exp(coef))
         return pd.Series(items, name=f"relativity[{variable}]")
 
@@ -217,9 +215,7 @@ class GLM:
             return self._fit_glum(spec, design, y_arr, sw, offset)
         if self.backend == "statsmodels":
             return self._fit_statsmodels(spec, design, y_arr, sw, offset)
-        raise ValueError(
-            f"backend must be 'glum' or 'statsmodels', got {self.backend!r}"
-        )
+        raise ValueError(f"backend must be 'glum' or 'statsmodels', got {self.backend!r}")
 
     def _fit_glum(
         self,
@@ -335,9 +331,9 @@ def _deviance(
     elif spec.name == "tweedie":
         p = spec.tweedie_power or 1.5
         with np.errstate(divide="ignore", invalid="ignore"):
-            term1 = np.where(
-                y > 0, y ** (2 - p) / ((1 - p) * (2 - p)), 0.0
-            ) - y * mu ** (1 - p) / (1 - p)
+            term1 = np.where(y > 0, y ** (2 - p) / ((1 - p) * (2 - p)), 0.0) - y * mu ** (1 - p) / (
+                1 - p
+            )
             term2 = mu ** (2 - p) / (2 - p)
         dev = 2.0 * np.sum(w * (term1 + term2))
     elif spec.name == "gaussian":

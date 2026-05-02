@@ -233,8 +233,7 @@ class RatePlan:
         col = current_premium_col or self.premium_col or "earned_premium"
         if col not in self.policies.columns:
             raise KeyError(
-                f"current premium column {col!r} not in policies; "
-                f"pass current_premium_col=..."
+                f"current premium column {col!r} not in policies; pass current_premium_col=..."
             )
         indicated = self.classification.predict_premium(
             self.policies, exposure_col=self.exposure_col
@@ -250,9 +249,7 @@ class RatePlan:
             extra_columns=[
                 v
                 for v in (
-                    self.classification.rating_vars
-                    if self.classification is not None
-                    else []
+                    self.classification.rating_vars if self.classification is not None else []
                 )
                 if v in self.policies.columns
             ],

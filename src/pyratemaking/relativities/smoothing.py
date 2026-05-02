@@ -42,31 +42,25 @@ def smooth_relativities(
     raise ValueError(f"unknown smoothing method {method!r}")
 
 
-def _whittaker(  # pragma: no cover - depends on optional package
+def _whittaker(
     rel: pd.Series,
     *,
     weights: pd.Series | None,
     smoothing_param: float,
 ) -> pd.Series:
     try:
-        import whsmooth
+        from whsmooth import WhittakerHenderson1D
     except ImportError as exc:
         raise ImportError(
             "Whittaker smoothing requires whsmooth. "
             "Install with: pip install pyratemaking[smoothing]"
         ) from exc
 
-    if not hasattr(whsmooth, "smooth"):
-        raise AttributeError("whsmooth.smooth not found in installed version")
-
-    w = (
-        weights.reindex(rel.index).fillna(0).to_numpy(dtype=float)
-        if weights is not None
-        else np.ones(len(rel))
+    w = weights.reindex(rel.index).fillna(0).to_numpy(dtype=float) if weights is not None else None
+    smoother = WhittakerHenderson1D(lam=float(smoothing_param), weights=w)
+    smoother.fit(rel.to_numpy(dtype=float))
+    return pd.Series(
+        np.asarray(smoother.fitted_, dtype=float),
+        index=rel.index,
+        name=rel.name,
     )
-    smoothed = whsmooth.smooth(
-        rel.to_numpy(dtype=float),
-        weights=w,
-        lam=float(smoothing_param),
-    )
-    return pd.Series(np.asarray(smoothed, dtype=float), index=rel.index, name=rel.name)

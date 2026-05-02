@@ -64,8 +64,7 @@ class ImplementationResult:
 
     def __repr__(self) -> str:
         return (
-            f"ImplementationResult(n={len(self.impacted)}, "
-            f"cap={self.cap!r}, floor={self.floor!r})"
+            f"ImplementationResult(n={len(self.impacted)}, cap={self.cap!r}, floor={self.floor!r})"
         )
 
 
