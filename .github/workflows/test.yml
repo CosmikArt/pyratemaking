@@ -14,6 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
+        extras: [core, full]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -21,19 +22,38 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - name: Install
+
+      - name: Install (core)
+        if: matrix.extras == 'core'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Install (full ecosystem)
+        if: matrix.extras == 'full'
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[full,dev]"
+
       - name: Lint
         run: ruff check .
+
       - name: Type check
         run: mypy src/pyratemaking/core src/pyratemaking/glm
         continue-on-error: true
-      - name: Tests
+
+      - name: Tests (core — skip ecosystem bridges)
+        if: matrix.extras == 'core'
+        run: |
+          pytest --cov=pyratemaking --cov-report=xml -m "not network" \
+            --ignore=tests/integration/test_ecosystem_bridges.py
+
+      - name: Tests (full — include ecosystem bridges)
+        if: matrix.extras == 'full'
         run: pytest --cov=pyratemaking --cov-report=xml -m "not network"
+
       - name: Upload coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12' && matrix.extras == 'full'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
