@@ -92,7 +92,8 @@ def merge_policy_losses(
         .agg(["sum", "count"])
         .rename(columns={"sum": "incurred_losses", "count": "claim_count"})
     )
-    out = policies.merge(
+    base = policies.drop(columns=[c for c in ("incurred_losses", "claim_count") if c in policies.columns])
+    out = base.merge(
         by_policy,
         how="left",
         left_on=policy_schema_id,
