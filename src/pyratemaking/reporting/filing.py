@@ -134,7 +134,14 @@ def render_filing_html(report: RatePlanReport) -> str:
             ),
         }
     # Defensive defaults when sections are missing.
-    for key in ("indication", "onleveling", "trending", "development", "classification", "implementation"):
+    for key in (
+        "indication",
+        "onleveling",
+        "trending",
+        "development",
+        "classification",
+        "implementation",
+    ):
         ctx.setdefault(key, None)
 
     # Make scalar formatting deterministic.

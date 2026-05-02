@@ -57,20 +57,19 @@ def credibility_weighted(
     return pd.Series(weighted, index=relativities.index, name="credibility_weighted")
 
 
-def _actuarcredibility_z(
-    relativities: pd.Series, exposures: pd.Series
-) -> np.ndarray:  # pragma: no cover - depends on optional package
+def _actuarcredibility_z(relativities: pd.Series, exposures: pd.Series) -> np.ndarray:
     try:
-        import actuarcredibility
+        from actuarcredibility import LimitedFluctuationCredibility
     except ImportError as exc:
         raise ImportError(
             "actuarcredibility is not installed. "
             "Install with: pip install pyratemaking[credibility]"
         ) from exc
-    if not hasattr(actuarcredibility, "buhlmann_z"):
-        raise AttributeError(
-            "actuarcredibility.buhlmann_z not found in installed version"
-        )
-    return np.asarray(
-        actuarcredibility.buhlmann_z(relativities, exposures), dtype=float
+
+    model = LimitedFluctuationCredibility()
+    n = exposures.to_numpy(dtype=float)
+    z = np.array(
+        [model.credibility_factor(float(ni)) for ni in n],
+        dtype=float,
     )
+    return z

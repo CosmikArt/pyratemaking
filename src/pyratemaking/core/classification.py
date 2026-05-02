@@ -139,15 +139,10 @@ def classify(
             base_levels=base_levels,
         )
         cat_vars = [v for v in rating_vars if not pd.api.types.is_numeric_dtype(X[v])]
-        rels = {
-            v: fs.frequency.relativities(v) * fs.severity.relativities(v)
-            for v in cat_vars
-        }
+        rels = {v: fs.frequency.relativities(v) * fs.severity.relativities(v) for v in cat_vars}
         raw_model = fs
     else:
-        raise ValueError(
-            f"family must be 'tweedie' or 'frequency_severity', got {family!r}"
-        )
+        raise ValueError(f"family must be 'tweedie' or 'frequency_severity', got {family!r}")
 
     pp_pred = _predict_pp(raw_model, family, X)
     base_rate = float(np.mean(pp_pred))

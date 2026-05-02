@@ -42,7 +42,9 @@ def deviance_residuals(
     family = family.lower()
     if family == "poisson":
         with np.errstate(divide="ignore", invalid="ignore"):
-            term = np.where(y_arr > 0, y_arr * np.log(y_arr / np.where(mu_arr > 0, mu_arr, 1e-12)), 0.0)
+            term = np.where(
+                y_arr > 0, y_arr * np.log(y_arr / np.where(mu_arr > 0, mu_arr, 1e-12)), 0.0
+            )
         d = 2 * (term - (y_arr - mu_arr))
     elif family == "gamma":
         with np.errstate(divide="ignore", invalid="ignore"):

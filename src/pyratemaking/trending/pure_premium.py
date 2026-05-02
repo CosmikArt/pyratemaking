@@ -24,9 +24,7 @@ def pure_premium_trend(
 ) -> Trend:
     """Fit a trend to pure premium by period."""
     if not incurred_losses.index.equals(earned_exposure.index):
-        incurred_losses, earned_exposure = incurred_losses.align(
-            earned_exposure, join="inner"
-        )
+        incurred_losses, earned_exposure = incurred_losses.align(earned_exposure, join="inner")
     losses = incurred_losses.to_numpy(dtype=float)
     exp_arr = earned_exposure.to_numpy(dtype=float)
     pp = np.where(exp_arr > 0, losses / np.where(exp_arr > 0, exp_arr, 1), np.nan)

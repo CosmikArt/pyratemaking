@@ -152,10 +152,7 @@ class ChainLadder:
         return pd.DataFrame(rows).set_index("ay")
 
     def __repr__(self) -> str:
-        return (
-            f"ChainLadder(n_periods={len(self.triangle)}, "
-            f"tail_factor={self.tail_factor:.4f})"
-        )
+        return f"ChainLadder(n_periods={len(self.triangle)}, tail_factor={self.tail_factor:.4f})"
 
     def to_burncost(self):  # pragma: no cover - depends on optional package
         from pyratemaking.development._burncost_bridge import to_burncost_triangle

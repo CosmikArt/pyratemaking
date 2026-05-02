@@ -111,7 +111,9 @@ class Trend:
         )
 
 
-def _ols(x: np.ndarray, y: np.ndarray, weights: np.ndarray | None) -> tuple[float, float, float, float]:
+def _ols(
+    x: np.ndarray, y: np.ndarray, weights: np.ndarray | None
+) -> tuple[float, float, float, float]:
     """Weighted least squares for ``y ~ a + b*x``. Returns ``(a, b, b_se, sigma)``."""
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
@@ -184,9 +186,7 @@ def fit_trend(
 
     if kind in ("multiplicative", "exponential"):
         if (values_arr <= 0).any():
-            raise ValueError(
-                "multiplicative/exponential trend requires strictly positive values"
-            )
+            raise ValueError("multiplicative/exponential trend requires strictly positive values")
         y = np.log(values_arr)
     else:
         y = values_arr

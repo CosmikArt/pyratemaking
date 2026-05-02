@@ -84,10 +84,7 @@ def _segments(
     boundaries.append(hi)
     factors_after.append(cumulative)
 
-    return [
-        (boundaries[i], boundaries[i + 1], factors_after[i])
-        for i in range(len(factors_after))
-    ]
+    return [(boundaries[i], boundaries[i + 1], factors_after[i]) for i in range(len(factors_after))]
 
 
 def _hat_integral(a: float, b: float, year: int) -> float:
@@ -200,7 +197,5 @@ def on_level_factors(
         current_factor = starting_factor
         for ch in changes:
             current_factor *= ch.factor
-    avgs = np.array(
-        [average_rate_level(int(y), changes, starting_factor) for y in years]
-    )
+    avgs = np.array([average_rate_level(int(y), changes, starting_factor) for y in years])
     return pd.Series(current_factor / avgs, index=list(years), name="on_level_factor")

@@ -45,9 +45,7 @@ def family_spec(
         "inverse_squared": sm.families.links.InverseSquared(),
     }
     if link not in links_map:
-        raise ValueError(
-            f"unsupported link {link!r}; choose from {sorted(links_map)}"
-        )
+        raise ValueError(f"unsupported link {link!r}; choose from {sorted(links_map)}")
 
     if family == "poisson":
         sm_factory = lambda: sm.families.Poisson(link=links_map[link])  # noqa: E731

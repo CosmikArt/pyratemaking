@@ -37,11 +37,7 @@ def monotone_relativities(
     """
     levels = list(relativities.index)
     log_rel = np.log(relativities.to_numpy(dtype=float))
-    w = (
-        weights.reindex(levels).fillna(1.0).to_numpy(dtype=float)
-        if weights is not None
-        else None
-    )
+    w = weights.reindex(levels).fillna(1.0).to_numpy(dtype=float) if weights is not None else None
     iso = IsotonicRegression(increasing=increasing)
     fitted = iso.fit_transform(np.arange(len(levels), dtype=float), log_rel, sample_weight=w)
     return pd.Series(np.exp(fitted), index=levels, name=relativities.name)

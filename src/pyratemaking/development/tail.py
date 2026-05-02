@@ -110,9 +110,7 @@ def exponential_decay_tail(
     proj_ages = last_age + np.arange(1, periods_to_extend + 1, dtype=float)
     proj_ldfs = 1.0 + a * np.exp(-b * proj_ages)
     tail = float(np.prod(proj_ldfs))
-    return tail, pd.DataFrame(
-        {"method": ["exp_decay"], "a": [a], "b": [b], "tail": [tail]}
-    )
+    return tail, pd.DataFrame({"method": ["exp_decay"], "a": [a], "b": [b], "tail": [tail]})
 
 
 def power_curve_tail(
@@ -129,9 +127,7 @@ def power_curve_tail(
     excess = ldfs - 1.0
     mask = (excess > 0) & np.isfinite(excess)
     if mask.sum() < 2:
-        return 1.0, pd.DataFrame(
-            {"method": ["power"], "a": [np.nan], "b": [np.nan], "tail": [1.0]}
-        )
+        return 1.0, pd.DataFrame({"method": ["power"], "a": [np.nan], "b": [np.nan], "tail": [1.0]})
     log_excess = np.log(excess[mask])
     log_ages = np.log(ages[mask])
     slope, intercept = np.polyfit(log_ages, log_excess, 1)
@@ -141,9 +137,7 @@ def power_curve_tail(
     proj_ages = last_age + np.arange(1, periods_to_extend + 1, dtype=float)
     proj_ldfs = 1.0 + a / np.power(proj_ages, b)
     tail = float(np.prod(proj_ldfs))
-    return tail, pd.DataFrame(
-        {"method": ["power"], "a": [a], "b": [b], "tail": [tail]}
-    )
+    return tail, pd.DataFrame({"method": ["power"], "a": [a], "b": [b], "tail": [tail]})
 
 
 def select_tail(
@@ -162,9 +156,7 @@ def select_tail(
         elif m == "power":
             _, info = power_curve_tail(link_factors, periods_to_extend=periods_to_extend)
         elif m == "exp_decay":
-            _, info = exponential_decay_tail(
-                link_factors, periods_to_extend=periods_to_extend
-            )
+            _, info = exponential_decay_tail(link_factors, periods_to_extend=periods_to_extend)
         else:
             raise ValueError(f"unknown tail method {m!r}")
         out.append(info)

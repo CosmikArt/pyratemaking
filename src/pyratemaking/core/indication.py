@@ -39,19 +39,13 @@ class ExpenseProvision:
     @property
     def variable_load(self) -> float:
         """Sum of provisions expressed as a fraction of premium."""
-        return (
-            self.variable_expense_ratio
-            + self.profit_and_contingency
-            + self.other_acquisition
-        )
+        return self.variable_expense_ratio + self.profit_and_contingency + self.other_acquisition
 
     def divisor(self) -> float:
         """``1 - V - Q`` denominator from W&M Eq. 8.2 / 8.3."""
         denom = 1.0 - self.variable_load
         if denom <= 0:
-            raise ValueError(
-                "expense provisions exceed 1.0 — divisor is non-positive"
-            )
+            raise ValueError("expense provisions exceed 1.0 — divisor is non-positive")
         return denom
 
 

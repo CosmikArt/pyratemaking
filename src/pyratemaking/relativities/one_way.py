@@ -37,17 +37,11 @@ def one_way_relativities(
         agg["count"] = (count_col, "sum")
 
     grouped = df.groupby(variable, dropna=False).agg(**agg)
-    grouped["pure_premium"] = grouped["losses"] / grouped["exposure"].where(
-        grouped["exposure"] > 0
-    )
+    grouped["pure_premium"] = grouped["losses"] / grouped["exposure"].where(grouped["exposure"] > 0)
 
     if count_col is not None:
-        grouped["frequency"] = grouped["count"] / grouped["exposure"].where(
-            grouped["exposure"] > 0
-        )
-        grouped["severity"] = grouped["losses"] / grouped["count"].where(
-            grouped["count"] > 0
-        )
+        grouped["frequency"] = grouped["count"] / grouped["exposure"].where(grouped["exposure"] > 0)
+        grouped["severity"] = grouped["losses"] / grouped["count"].where(grouped["count"] > 0)
 
     if base_level is None:
         base_level = grouped["exposure"].idxmax()

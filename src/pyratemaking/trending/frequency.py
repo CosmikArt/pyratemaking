@@ -28,8 +28,6 @@ def frequency_trend(
     freq = np.where(exp_arr > 0, counts / np.where(exp_arr > 0, exp_arr, 1), np.nan)
     freq_series = pd.Series(freq, index=claim_count.index, name="frequency").dropna()
     if times is None:
-        times = pd.Series(
-            freq_series.index.to_numpy(dtype=float), index=freq_series.index
-        )
+        times = pd.Series(freq_series.index.to_numpy(dtype=float), index=freq_series.index)
     weights = exp_arr[~np.isnan(freq)] if weight_by_exposure else None
     return fit_trend(freq_series, times.loc[freq_series.index], kind=kind, weights=weights)
